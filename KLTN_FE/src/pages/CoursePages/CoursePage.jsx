@@ -1,171 +1,164 @@
-import React, { useEffect, useState } from "react";
-import Filter from "../../components/FilterComponent/FilterComponet";
-import CourseCardComponent from "../../components/CourseCardComponent/CourseCardComponent";
-import CourseDetailComponent from "../../components/CourseDetailComponent/CourseDetailComponent";
-import { useDispatch, useSelector } from "react-redux";
-import { useSearchParams } from "react-router-dom";
-import {
-  fetchCourses,
-  fetchCourseDetails,
-} from "../../redux/slices/productSlice";
-import { addToCart, fetchCartItems } from "../../redux/slices/cartSlice";
-import { toast } from "react-toastify";
-import {
-  WrapperCoursePage,
-  WrapperCourseContainer,
-  WrapperCourseHeader,
-  WrapperCourseGrid,
-  SortSelect,
-  CenteredPagination,
-} from "./style";
-import mockCourses from "../../lib/mockdata";
-import { Pagination } from "antd";
+  import React, { useEffect, useState } from "react";
+  import Filter from "../../components/FilterComponent/FilterComponet";
+  import CourseCardComponent from "../../components/CourseCardComponent/CourseCardComponent";
+  import CourseDetailComponent from "../CourseDetailPage/CourseDetailPage";
+  import { useDispatch, useSelector } from "react-redux";
+  import { useSearchParams, useNavigate } from "react-router-dom";
+  import { fetchCourseDetails } from "../../redux/slices/courseSlice";
+  import { addOrderProduct } from "../../redux/slices/orderSlice";
+  import { toast } from "react-toastify";
+  import {
+    WrapperCoursePage,
+    WrapperCourseContainer,
+    WrapperCourseHeader,
+    WrapperCourseGrid,
+    SortSelect,
+    CenteredPagination,
+  } from "./style";
+  import { Pagination } from "antd";
+  import * as CourseService from "../../services/CourseService";
 
-const sortOptions = [
-  { id: "price-lowtohigh", label: "Giá: Thấp đến Cao" },
-  { id: "price-hightolow", label: "Giá: Cao đến Thấp" },
-  { id: "title-atoz", label: "Tiêu đề: A đến Z" },
-  { id: "title-ztoa", label: "Tiêu đề: Z đến A" },
-];
+  const sortOptions = [
+    { id: "price-lowtohigh", label: "Giá: Thấp đến Cao" },
+    { id: "price-hightolow", label: "Giá: Cao đến Thấp" },
+    { id: "title-atoz", label: "Tiêu đề: A đến Z" },
+    { id: "title-ztoa", label: "Tiêu đề: Z đến A" },
+  ];
 
-function createSearchParamsHelper(filterParams) {
-  const queryParams = [];
-  for (const [key, value] of Object.entries(filterParams)) {
-    if (Array.isArray(value) && value.length > 0) {
-      const paramValue = value.join(",");
-      queryParams.push(`${key}=${encodeURIComponent(paramValue)}`);
+  function createSearchParamsHelper(filterParams) {
+    const queryParams = [];
+    for (const [key, value] of Object.entries(filterParams)) {
+      if (Array.isArray(value) && value.length > 0) {
+        const paramValue = value.join(",");
+        queryParams.push(`${key}=${encodeURIComponent(paramValue)}`);
+      }
     }
-  }
-  return queryParams.join("&");
-}
-
-function CoursePage() {
-  const dispatch = useDispatch();
-  // const { productList: courseList, productDetails: courseDetails } =
-  //   useSelector((state) => state.product);
-  const courseList = mockCourses;
-  const courseDetails = mockCourses[0];
-  const { cartItems } = useSelector((state) => state.cart);
-  const { user } = useSelector((state) => state.user);
-  const [filters, setFilters] = useState({});
-  const [sort, setSort] = useState(null);
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
-
-  const categorySearchParam = searchParams.get("category");
-
-  function handleSort(value) {
-    setSort(value);
+    return queryParams.join("&");
   }
 
-  function handleFilter(sectionId, optionId) {
-    let updatedFilters = { ...filters };
-    if (!updatedFilters[sectionId]) {
-      updatedFilters[sectionId] = [optionId];
-    } else {
-      const optionIndex = updatedFilters[sectionId].indexOf(optionId);
-      if (optionIndex === -1) {
-        updatedFilters[sectionId].push(optionId);
+  function CoursePage() {
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const { orderItems } = useSelector((state) => state.order);
+    const { user } = useSelector((state) => state.user);
+    const [filters, setFilters] = useState({});
+    const [sort, setSort] = useState(null);
+    const [courseList, setCourseList] = useState([]);
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
+    const [courseDetails, setCourseDetails] = useState(null);
+
+    const categorySearchParam = searchParams.get("category");
+
+    const handleSort = (value) => {
+      setSort(value);
+    };
+
+    const handleFilter = (sectionId, optionId) => {
+      let updatedFilters = { ...filters };
+      if (!updatedFilters[sectionId]) {
+        updatedFilters[sectionId] = [optionId];
       } else {
-        updatedFilters[sectionId].splice(optionIndex, 1);
+        const optionIndex = updatedFilters[sectionId].indexOf(optionId);
+        if (optionIndex === -1) {
+          updatedFilters[sectionId].push(optionId);
+        } else {
+          updatedFilters[sectionId].splice(optionIndex, 1);
+        }
       }
-    }
-    setFilters(updatedFilters);
-    sessionStorage.setItem("filters", JSON.stringify(updatedFilters));
-  }
+      setFilters(updatedFilters);
+      sessionStorage.setItem("filters", JSON.stringify(updatedFilters));
+    };
 
-  function handleGetCourseDetails(courseId) {
-    dispatch(fetchCourseDetails(courseId));
-  }
+    const handleGetCourseDetails = (courseId) => {
+      dispatch(fetchCourseDetails(courseId)).then((res) => {
+        if (res?.payload) {
+          setCourseDetails(res.payload);
+          setOpenDetailsDialog(true);
+        }
+      });
+    };
 
-  function handleAddToCart(courseId, totalStock) {
-    const currentCartItems = cartItems.items || [];
-    const itemIndex = currentCartItems.findIndex(
-      (item) => item.productId === courseId
-    );
+    const handleAddToCart = (courseId, classId) => {
+      dispatch(addOrderProduct({ courseId, classId }));
+      toast.success("Đã thêm khóa học vào giỏ hàng!");
+    };
 
-    if (
-      itemIndex > -1 &&
-      currentCartItems[itemIndex].quantity + 1 > totalStock
-    ) {
-      toast.warning(
-        `Chỉ có thể thêm ${currentCartItems[itemIndex].quantity} số lượng cho khóa học này`
-      );
-      return;
-    }
-
-    dispatch(
-      addToCart({ userId: user?.id, productId: courseId, quantity: 1 })
-    ).then((data) => {
-      if (data?.payload?.success) {
-        dispatch(fetchCartItems(user?.id));
-        toast.success("Khóa học đã được thêm vào giỏ hàng");
+    useEffect(() => {
+      try {
+        const storedFilters = JSON.parse(sessionStorage.getItem("filters"));
+        setFilters(storedFilters || {});
+      } catch (err) {
+        setFilters({});
       }
-    });
-  }
+      setSort("price-lowtohigh");
+    }, [categorySearchParam]);
 
-  useEffect(() => {
-    setSort("price-lowtohigh");
-    setFilters(JSON.parse(sessionStorage.getItem("filters")) || {});
-  }, [categorySearchParam]);
+    useEffect(() => {
+      const fetchCoursesFromDB = async () => {
+        try {
+          const res = await CourseService.getAllCourse(filters, sort);
+          if (res?.status === "OK") {
+            setCourseList(res.data);
+            console.log("response:", res.data);
+          }
+        } catch (error) {
+          console.error("Lỗi khi fetch khóa học:", error);
+        }
+      };
 
-  useEffect(() => {
-    if (filters && Object.keys(filters).length > 0) {
-      const queryString = createSearchParamsHelper(filters);
-      setSearchParams(new URLSearchParams(queryString));
-    }
-  }, [filters]);
+      if (filters && sort) {
+        fetchCoursesFromDB();
+      }
+    }, [filters, sort]);
 
-  useEffect(() => {
-    if (filters && sort)
-      dispatch(fetchCourses({ filterParams: filters, sortParams: sort }));
-  }, [dispatch, sort, filters]);
+    return (
+      <WrapperCoursePage>
+        <Filter filters={filters} handleFilter={handleFilter} />
 
-  useEffect(() => {
-    if (courseDetails) setOpenDetailsDialog(true);
-  }, [courseDetails]);
+        <WrapperCourseContainer>
+          <WrapperCourseHeader>
+            <h2>Tất cả khóa học</h2>
+            <div>
+              <span>{courseList?.length} khóa học</span>
+              <SortSelect
+                value={sort}
+                onChange={(e) => handleSort(e.target.value)}
+              >
+                {sortOptions.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.label}
+                  </option>
+                ))}
+              </SortSelect>
+            </div>
+          </WrapperCourseHeader>
 
-  return (
-    <WrapperCoursePage>
-      <Filter filters={filters} handleFilter={handleFilter} />
-
-      <WrapperCourseContainer>
-        <WrapperCourseHeader>
-          <h2>Tất cả khóa học</h2>
-          <div>
-            <span>{courseList?.length} khóa học</span>
-            <SortSelect
-              value={sort}
-              onChange={(e) => handleSort(e.target.value)}
-            >
-              {sortOptions.map((option) => (
-                <option key={option.id} value={option.id}>
-                  {option.label}
-                </option>
-              ))}
-            </SortSelect>
-          </div>
-        </WrapperCourseHeader>
-
-        <WrapperCourseGrid>
-          {courseList &&
-            courseList.length > 0 &&
-            courseList.map((course) => (
+          <WrapperCourseGrid>
+            {courseList.map((course) => (
               <CourseCardComponent
-                key={course.id}
-                course={course}
-                handleGetCourseDetails={handleGetCourseDetails}
-                handleAddToCart={handleAddToCart}
+                key={course._id}
+                course={{ ...course, id: course._id }}
+                handleAddToCart={() => handleAddToCart(course._id, course.classId)}
+                onClick={() => navigate(`/course-details/${course._id}`)}
               />
             ))}
-        </WrapperCourseGrid>
-      </WrapperCourseContainer>
+          </WrapperCourseGrid>
+        </WrapperCourseContainer>
 
-      <CenteredPagination>
-        <Pagination defaultCurrent={1} total={50} />
-      </CenteredPagination>
-    </WrapperCoursePage>
-  );
-}
+        <CenteredPagination>
+          <Pagination defaultCurrent={1} total={courseList.length} />
+        </CenteredPagination>
 
-export default CoursePage;
+        {openDetailsDialog && courseDetails && (
+          <CourseDetailComponent
+            open={openDetailsDialog}
+            setOpen={setOpenDetailsDialog}
+            course={courseDetails}
+          />
+        )}
+      </WrapperCoursePage>
+    );
+  }
+
+  export default CoursePage;

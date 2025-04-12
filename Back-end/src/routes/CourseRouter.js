@@ -4,11 +4,10 @@ const CourseController = require('../controllers/CourseController');
 const { authMiddleWare } = require("../middleware/authMiddleware");
 
 router.post('/create', authMiddleWare, CourseController.createCourse)
-router.post('/:courseId/classes', authMiddleWare, CourseController.addClassToCourse);
 router.put('/update/:id', authMiddleWare, CourseController.updateCourse)
-router.get('/get-details/:id', authMiddleWare, CourseController.getDetailsCourse)
+router.get('/get-details/:id', CourseController.getDetailsCourse)
 router.delete('/delete/:id', authMiddleWare, CourseController.deleteCourse)
-router.get('/get-all', authMiddleWare, CourseController.getAllCourse)
+router.get('/get-all', CourseController.getAllCourse)
 router.post('/delete-many', authMiddleWare, CourseController.deleteMany)
 router.get('/get-all-type', authMiddleWare, CourseController.getAllType)
 

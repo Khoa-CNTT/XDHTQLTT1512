@@ -5,7 +5,7 @@ import CoursePage from "../pages/CoursePages/CoursePage";
 import ForgotPasswordPage from "../pages/ForgotPasswordPages/ForgotPasswordPage";
 import OrderPage from "../pages/OrderPages/OrderPages";
 import ProfilePage from "../pages/ProfilePages/ProfilePages";
-import CourseDetailPage from "../components/CourseDetailComponent/CourseDetailComponent";
+import CourseDetailPage from "../pages/CourseDetailPage/CourseDetailPage";
 import AdminLayout from "../pages/Admin/AdminLayout/AdminLayout";
 import ClassPage from "../pages/Admin/ClassPage/ClassPage";
 import BlogPage from "../pages/BlogPages/BlogPage";
@@ -14,6 +14,13 @@ import AdminDashboard from "../pages/Admin/AdminDashboard/AdminDashboard";
 import SchedulePage from "../pages/Admin/SchedulePage/SchedulePage";
 import StudentPage from "../pages/Admin/StudentPage/StudentPage";
 import ContactPage from "../pages/ContactPages/ContactPage";
+import TeacherPage from "../pages/Admin/TeacherPage/TeacherPage";
+import ExamPage from "../pages/Admin/TeacherPage/TeacherPage";
+import PaymentManagement from "../pages/Admin/PaymentManagementPage/PaymentManagement";
+import ReportPage from "../pages/Admin/ReportPage/ReportPage";
+import AssessPage from "../pages/Admin/AssessPage/AssessPage";
+import AttendancePage from "../pages/Admin/AttendancePage/AttendancePage";
+import StudentschedulePage from "../pages/StudentschedulePage/StudentschedulePage"
 
 export const routes = [
   {
@@ -41,7 +48,7 @@ export const routes = [
     isShowFooter: true,
   },
   {
-    path: "/course-details/1",
+    path: "/course-details/:id",
     page: CourseDetailPage,
     isShowHeader: true,
     isShowFooter: true,
@@ -83,6 +90,13 @@ export const routes = [
     isShowHeader: true,
     isShowFooter: true,
   },
+  {
+    path: "/schedule",
+    page: StudentschedulePage,
+    isShowHeader: true,
+    isShowFooter: false,
+  },
+
   // Admin Routes
   {
     path: "/system/admin",
@@ -107,6 +121,30 @@ export const routes = [
       {
         path: "students",
         page: StudentPage,
+      },
+      {
+        path: "teachers",
+        page: TeacherPage,
+      },
+      {
+        path: "exams",
+        page: ExamPage,
+      },
+      {
+        path: "payment",
+        page: PaymentManagement,
+      },
+      {
+        path: "assess",
+        page: AssessPage,
+      },
+      {
+        path: "report",
+        page: ReportPage,
+      },
+      {
+        path: "attendance",
+        page: AttendancePage,
       },
     ],
   },

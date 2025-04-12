@@ -1,15 +1,13 @@
+import { jwtDecode } from "jwt-decode";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { jwtDecode } from "jwt-decode";
 import * as UserService from "../../services/UserService";
 import { useMutationHooks } from "../../hooks/useMutationHooks";
-import * as message from "../../components/Message/Message";
 import { updateUser } from "../../redux/slices/userSlice";
 import InputForm from "../../components/InputForm/InputForm";
 import { EyeFilled, EyeInvisibleFilled } from "@ant-design/icons";
 import ButtonComponent from "../../components/ButtonComponent/ButtonComponent";
-
 import {
   SigninContainer,
   SigninForm,
@@ -20,12 +18,13 @@ import {
   SignupLink,
   BoldText,
 } from "./style";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const SignInPages = () => {
   const [isShowPassword, setIsShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
@@ -35,48 +34,67 @@ const SignInPages = () => {
 
   useEffect(() => {
     if (isSuccess) {
-      const redirectPath = location?.state || "/";
-      navigate(redirectPath);
       localStorage.setItem("access_token", JSON.stringify(data?.access_token));
-      localStorage.setItem(
-        "refresh_token",
-        JSON.stringify(data?.refresh_token)
-      );
+      localStorage.setItem("refresh_token", JSON.stringify(data?.refresh_token));
+      const decoded = jwtDecode(data?.access_token);
 
-      if (data?.access_token) {
-        const decoded = jwtDecode(data?.access_token);
-        if (decoded?.id) {
-          handleGetDetailsUser(decoded?.id, data?.access_token);
-        }
-        if ( decoded?.isAdmin ){
-          navigate("/system/admin")
-        } else {
-          const redirecPath = location?.state || "/" ;
-          navigate(redirecPath)
-        }
-
+      if (decoded?.id) {
+        handleGetDetailsUser(decoded?.id, data?.access_token);
       }
+
+      if (decoded?.isAdmin) {
+        navigate("/system/admin");
+      } else {
+        const redirectPath = location?.state || "/";
+        navigate(redirectPath);
+      }
+
+      toast.success("Đăng nhập thành công!");
     }
 
     if (isError) {
-      const errorMessage =
-        error?.response?.data?.message ||
-        "An error occurred. Please try again.";
-      message.error(errorMessage);
+      const errorMessage = error?.response?.data?.message || "Đã có lỗi xảy ra. Vui lòng thử lại.";
+      if (errorMessage.includes("email")) {
+        toast.error("Email không tồn tại.");
+      } else if (errorMessage.includes("password")) {
+        toast.error("Sai mật khẩu hoặc định dạng mật khẩu không hợp lệ.");
+      } else {
+        toast.error(errorMessage);
+      }
     }
   }, [isSuccess, isError, error]);
 
   const handleGetDetailsUser = async (id, token) => {
     const refreshToken = JSON.parse(localStorage.getItem("refresh_token"));
-    const res = await UserService.getDetailsUser(id, token);
-    dispatch(updateUser({ ...res?.data, access_token: token, refreshToken }));
+    try {
+      const res = await UserService.getDetailsUser(id, token);
+      dispatch(updateUser({ ...res?.data, access_token: token, refreshToken }));
+    } catch (err) {
+      toast.error("Không thể lấy thông tin người dùng.");
+    }
   };
 
   const handleSignIn = () => {
-    setErrorMessage("");
+    if (!email || !password) {
+      toast.warning("Vui lòng điền đầy đủ thông tin.");
+      return;
+    }
+  
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.warning("Email không đúng định dạng.");
+      return;
+    }
+  
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{6,}$/;
+    if (!passwordRegex.test(password)) {
+      toast.warning("Mật khẩu phải có ít nhất 6 ký tự, bao gồm chữ và số.");
+      return;
+    }
+  
     mutation.mutate({ email, password });
   };
-
+  
   return (
     <SigninContainer>
       <SigninForm>
@@ -97,14 +115,12 @@ const SignInPages = () => {
               {isShowPassword ? <EyeFilled /> : <EyeInvisibleFilled />}
             </EyeIcon>
             <InputForm
-              placeholder="Password"
+              placeholder="Mật khẩu"
               type={isShowPassword ? "text" : "password"}
               value={password}
               onChange={(val) => setPassword(val)}
             />
           </StyledInputWrapper>
-
-          {errorMessage && <span style={{ color: "red" }}>{errorMessage}</span>}
 
           <ButtonComponent
             disabled={!email || !password}
@@ -132,12 +148,12 @@ const SignInPages = () => {
 
           <SignupLink>
             Chưa có tài khoản?{" "}
-            <BoldText onClick={() => navigate("/sign-up")}>
-              Tạo tài khoản
-            </BoldText>
+            <BoldText onClick={() => navigate("/sign-up")}>Tạo tài khoản</BoldText>
           </SignupLink>
         </SigninContent>
       </SigninForm>
+
+      <ToastContainer position="top-right" autoClose={3000} />
     </SigninContainer>
   );
 };

@@ -9,6 +9,13 @@ import ClassPage from "../../Admin/ClassPage/ClassPage";
 import SchedulePage from "../SchedulePage/SchedulePage";
 import CoursePage from "../CoursePage/CoursePage";
 import StudentPage from "../StudentPage/StudentPage";
+import TeacherPage from "../TeacherPage/TeacherPage";
+import ExamPage from "../ExamPage/ExamPage";
+import PaymentManagement from "../PaymentManagementPage/PaymentManagement";
+import ReportPage from "../ReportPage/ReportPage";
+import AssessPage from "../AssessPage/AssessPage";
+import AttendancePage from "../AttendancePage/AttendancePage";
+
 
 const AdminLayout = ({ children }) => {
   const location = useLocation();
@@ -21,10 +28,34 @@ const AdminLayout = ({ children }) => {
       return <SchedulePage />;
     }
     if (location.pathname === "/system/admin/courses") {
-      return <CoursePage />
+      return <CoursePage />;
     }
     if (location.pathname === "/system/admin/students") {
-      return <StudentPage/>
+      return <StudentPage />;
+    }
+    if (location.pathname === "/system/admin/teachers") {
+      return <TeacherPage />;
+    }
+    if (location.pathname === "/system/admin/exams") {
+      return <ExamPage />;
+    }
+    if (location.pathname === "/system/admin/payment") {
+      return <PaymentManagement />;
+    }
+    if (location.pathname === "/system/admin/report") {
+      return <ReportPage />;
+    }
+    if (location.pathname === "/system/admin/assess") {
+      return <AssessPage />;
+    }
+    if (location.pathname === "/system/admin/attendance") {
+      return <AttendancePage />;
+    }
+    if (location.pathname === "/system/admin/payment") {
+      return <PaymentManagement/>
+    }
+    if (location.pathname === "/system/admin/report") {
+      return <ReportPage/>
     }
     return <AdminDashboard />;
   };
@@ -35,9 +66,7 @@ const AdminLayout = ({ children }) => {
       <Content>
         <Header />
         <div>{children}</div>
-        <Main>
-          {renderPage()}
-        </Main>
+        <Main>{renderPage()}</Main>
       </Content>
     </Wrapper>
   );
