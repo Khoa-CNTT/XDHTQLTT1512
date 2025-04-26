@@ -14,17 +14,20 @@ import {
   IconWrapper,
 } from "./style";
 import { SearchOutlined } from "@ant-design/icons";
+
 const filterOptions = {
-  category: [
-    { id: "all", label: "Tất cả trình độ" },
-    { id: "is", label: "Sơ cấp" },
-    { id: "kids", label: "Trung cấp" },
-    { id: "accessories", label: "Cao cấp" },
-    { id: "compete", label: "Thi đấu" },
+  type: [
+    { id: "basic", label: "Cơ bản" },
+    { id: "intermediate1", label: "Trung cấp 1" },
+    { id: "intermediate2", label: "Trung cấp 2" },
+    { id: "advanced1", label: "Nâng cao 1" },
+    { id: "advanced2", label: "Nâng cao 2" },
   ],
 };
-
-function Filter({ filters, handleFilter }) {
+const sectionTitles = {
+  type: "Loại khóa học",
+};
+function Filter({ filters, handleFilter, searchText, setSearchText }) {
   return (
     <WrapperFilterContainer>
       <WrapperCourseFilter>
@@ -36,7 +39,8 @@ function Filter({ filters, handleFilter }) {
             </IconWrapper>
             <Input
               placeholder="Tìm kiếm khóa học..."
-              onChange={(e) => handleFilter("search", e.target.value)}
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
             />
           </WrapperSearchInput>
         </WrapperFilterHeader>
@@ -44,7 +48,7 @@ function Filter({ filters, handleFilter }) {
         {Object.keys(filterOptions).map((keyItem) => (
           <Fragment key={keyItem}>
             <WrapperFilterSection>
-              <WrapperFilterSectionTitle>Bộ lọc</WrapperFilterSectionTitle>
+              <WrapperFilterSectionTitle> {sectionTitles[keyItem] || "Bộ lọc"}</WrapperFilterSectionTitle>
               {filterOptions[keyItem].map((option) => (
                 <WrapperFilterOption as={Label} key={option.id}>
                   <Checkbox

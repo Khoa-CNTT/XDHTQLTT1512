@@ -1,16 +1,26 @@
 const scoreService = require('../services/ScoreService');
+const Score = require('../models/ScoreModel');
+const { default: mongoose } = require('mongoose');
 
 const createScore = async (req, res) => {
     try {
         const result = await scoreService.createScore(req.body);
         res.status(201).json(result);
     } catch (error) {
-        res.status(500).json({
-            status: "ERROR",
-            message: error.message
-        });
+        if (error.message === "Bảng điểm cho bài thi này đã tồn tại!") {
+            res.status(400).json({
+                status: "ERROR",
+                message: error.message
+            });
+        } else {
+            res.status(500).json({
+                status: "ERROR",
+                message: error.message
+            });
+        }
     }
 };
+
 
 const getAllScores = async (req, res) => {
     try {
@@ -24,20 +34,55 @@ const getAllScores = async (req, res) => {
     }
 };
 
-const getScoreById = async (req, res) => {
+const getScoreByExamId = async (req, res) => {
+    const { examId } = req.params
+    if (!mongoose.Types.ObjectId.isValid(examId)) {
+        return res.status(400).json({
+            status: "ERROR",
+            message: "examId không hợp lệ"
+        });
+    }
+
     try {
-        const result = await scoreService.getScoreById(req.params.id);
+        const result = await scoreService.getScoreByExamId(examId);
+
         if (result.status === "NOT_FOUND") {
             return res.status(404).json(result);
         }
+
         res.status(200).json(result);
     } catch (error) {
+        console.error("Lỗi khi truy vấn điểm theo examId:", error);
         res.status(500).json({
+            status: "ERROR",
+            message: "Có lỗi xảy ra khi xử lý yêu cầu. Vui lòng thử lại sau.",
+        });
+    }
+};
+
+
+const getScoreByExamIdAndStudentId = async (req, res) => {
+    const { examId, studentId } = req.params;
+    try {
+        const score = await scoreService.getScoreByExamIdAndStudentId(examId, studentId);
+
+        if (score !== null) {
+            return res.status(200).json({ score });
+        } else {
+            return res.status(404).json({
+                status: "ERROR",
+                message: 'Không tìm thấy điểm cho học sinh này trong bài thi này'
+            });
+        }
+    } catch (error) {
+        return res.status(500).json({
             status: "ERROR",
             message: error.message
         });
     }
 };
+
+
 
 const updateScore = async (req, res) => {
     try {
@@ -72,7 +117,8 @@ const deleteScore = async (req, res) => {
 module.exports = {
     createScore,
     getAllScores,
-    getScoreById,
+    getScoreByExamId,
     updateScore,
-    deleteScore
+    deleteScore,
+    getScoreByExamIdAndStudentId
 };

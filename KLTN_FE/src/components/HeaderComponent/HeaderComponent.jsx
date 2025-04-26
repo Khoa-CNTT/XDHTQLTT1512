@@ -1,17 +1,19 @@
-// ✅ HeaderComponent.jsx
 import React, { useState, useEffect } from "react";
-import { Col, Badge, Popover, Modal } from "antd";
+import { Col, Badge, Popover, Modal, Dropdown, Menu } from "antd";
 import {
   UserOutlined,
   ShoppingCartOutlined,
   ExclamationCircleOutlined,
+  DownOutlined,
+  FileTextOutlined,
+  SolutionOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { resetUser } from "../../redux/slices/userSlice";
+import { resetOrderState } from "../../redux/slices/orderSlice";
 import Logo from "../../assets/Logo1.png";
 import Loading from "../LoadingComponent/LoadingComponent";
-
 import {
   WrapperHeaderContainer,
   WrapperHeader,
@@ -57,26 +59,70 @@ const HeaderComponent = ({ isHiddenCart = false }) => {
   const handleConfirmLogout = () => {
     setShowLogoutModal(false);
     dispatch(resetUser());
+    dispatch(resetOrderState());
+
+    localStorage.removeItem("persist:root");
     localStorage.removeItem("user");
-    navigate("/sign-in");
+    localStorage.removeItem("cart");
+
+    navigate("/");
   };
+
+  const examMenu = (
+    <Menu
+      items={[
+        {
+          key: "do-exam",
+          icon: <FileTextOutlined />,
+          label: <span onClick={() => navigate("/exam")}>Làm bài thi</span>,
+        },
+        {
+          key: "view-result",
+          icon: <SolutionOutlined />,
+          label: <span onClick={() => navigate("/exam-result")}>Xem kết quả</span>,
+        },
+      ]}
+    />
+  );
 
   const content = (
     <div>
       <WrapperContentPopup onClick={() => navigate("/profile-user")}>
         Thông tin người dùng
       </WrapperContentPopup>
+
       {user?.isAdmin && (
         <WrapperContentPopup onClick={() => navigate("/system/admin")}>
           Quản lý hệ thống
         </WrapperContentPopup>
       )}
-      <WrapperContentPopup onClick={() => navigate("/schedule")}>
-        Lịch học
-      </WrapperContentPopup>
-      <WrapperContentPopup onClick={() => navigate("/my-order")}>
+
+      {user?.isTeacher && (
+        <WrapperContentPopup onClick={() => navigate("/system/teacher")}>
+          Quản lý của giảng viên
+        </WrapperContentPopup>
+      )}
+
+      {!user?.isTeacher && !user?.isAdmin && (
+        <>
+          <WrapperContentPopup onClick={() => navigate("/schedule")}>
+            Lịch học
+          </WrapperContentPopup>
+
+          {/* ✅ Dropdown "Bài thi" đẹp */}
+          <Dropdown overlay={examMenu} trigger={["click"]} placement="leftTop">
+            <WrapperContentPopup style={{ cursor: "pointer", display: "flex", alignItems: "center" }}>
+              Bài thi
+            </WrapperContentPopup>
+          </Dropdown>
+
+        </>
+      )}
+
+      <WrapperContentPopup onClick={() => navigate("/my-orders")}>
         Đơn hàng của tôi
       </WrapperContentPopup>
+
       <WrapperContentPopup
         onClick={() => {
           setIsOpenPopup(false);
@@ -102,7 +148,7 @@ const HeaderComponent = ({ isHiddenCart = false }) => {
             <WrapperTextHeader to="/">Trang Chủ</WrapperTextHeader>
             <WrapperTextHeader to="/courses">Khóa Học</WrapperTextHeader>
             <WrapperTextHeader to="/blogs">Bài Viết</WrapperTextHeader>
-            <WrapperTextHeader to="/introduce">Giới Thiệu</WrapperTextHeader>
+            <WrapperTextHeader to="/about">Giới Thiệu</WrapperTextHeader>
             <WrapperTextHeader to="/contact">Liên Hệ</WrapperTextHeader>
           </WrapperNavLinks>
 

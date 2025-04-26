@@ -28,7 +28,6 @@ const ClassPage = () => {
   const courseList = useSelector((state) => state.course.courseList);
   const user = useSelector((state) => state.user);
   const token = user?.access_token;
-
   const [classes, setClasses] = useState([]);
   const [teacherList, setTeacherList] = useState([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -118,9 +117,12 @@ const ClassPage = () => {
       setEditingClass(null);
       fetchClasses();
     } catch (error) {
-      toast.error('Lỗi khi lưu lớp học');
+      const errorMessage =
+        error?.response?.data?.message || 'Lỗi khi lưu lớp học';
+      toast.error(errorMessage);
     }
   };
+  
 
   const handleEdit = async (record) => {
     if (!token) return;

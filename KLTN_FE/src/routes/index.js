@@ -15,14 +15,25 @@ import SchedulePage from "../pages/Admin/SchedulePage/SchedulePage";
 import StudentPage from "../pages/Admin/StudentPage/StudentPage";
 import ContactPage from "../pages/ContactPages/ContactPage";
 import TeacherPage from "../pages/Admin/TeacherPage/TeacherPage";
-import ExamPage from "../pages/Admin/TeacherPage/TeacherPage";
+import ExamPage from "../pages/Admin/ExamPage/ExamPage";
 import PaymentManagement from "../pages/Admin/PaymentManagementPage/PaymentManagement";
 import ReportPage from "../pages/Admin/ReportPage/ReportPage";
 import AssessPage from "../pages/Admin/AssessPage/AssessPage";
 import AttendancePage from "../pages/Admin/AttendancePage/AttendancePage";
-import StudentschedulePage from "../pages/StudentschedulePage/StudentschedulePage"
+import StudentschedulePage from "../pages/StudentschedulePage/StudentschedulePage";
+import AccessDeniedPage from "../pages/AccessDeniedPage/AccessDeniedPage";
+import PaymentPage from "../pages/PaymentPage/PaymentPage";
+import AttendanceManagement from "../pages/AttendanceManagement/AttendanceManagement";
+import BlogManagementPage from "../pages/Admin/BlogManagementPage/BlogManagementPage";
+import ExamListPage from "../pages/ExamListPage/ExamListPage";
+import ExamResultPage from "../pages/ExamResultPage/ExamResultPage";
+import BlogDetailPage from "../pages/BlogDetailsPage/BlogDetailPage";
+import OrderSuccessPage from "../pages/OrderSuccesPage/OrderSuccesPage";
+import MyOrderPage from "../pages/MyOrderPage/MyOrderPage";
+import ScoreManagement from "../pages/ScoreManagementPage/ScoreManagementPage";
 
 export const routes = [
+  // Public Pages
   {
     path: "/",
     page: HomePage,
@@ -65,10 +76,17 @@ export const routes = [
     isShowHeader: true,
     isShowFooter: true,
   },
+  
+  {
+    path: "/order-success",
+    page: OrderSuccessPage,
+    isShowHeader: true,
+    isShowFooter: false,
+
+  },
   {
     path: "/profile-user",
     page: ProfilePage,
-
     isShowHeader: true,
     isShowFooter: false,
   },
@@ -79,7 +97,13 @@ export const routes = [
     isShowFooter: true,
   },
   {
-    path: "/introduce",
+    path: "/blogs-detail/:id",
+    page: BlogDetailPage,
+    isShowHeader: true,
+    isShowFooter: true,
+  },
+  {
+    path: "/about",
     page: AboutPage,
     isShowHeader: true,
     isShowFooter: true,
@@ -96,23 +120,49 @@ export const routes = [
     isShowHeader: true,
     isShowFooter: false,
   },
+  {
+    path: "/*",
+    page: AccessDeniedPage,
+  },
+  {
+    path: "/payment",
+    page: PaymentPage,
+    isShowHeader: true,
+    isShowFooter: false,
+  },
+  {
+    path: "/exam",
+    page: ExamListPage,
+    isShowHeader: true,
+    isShowFooter: false,
+  },
+  {
+    path: "/exam-result",
+    page: ExamResultPage,
+    isShowHeader: true,
+    isShowFooter: false,
+  },
+  {
+    path: "/my-orders",
+    page: MyOrderPage,
+    isShowHeader: true,
+    isShowFooter: false,
+  },
 
-  // Admin Routes
+  //  Admin Routes
   {
     path: "/system/admin",
+    isPrivated: true,
     layout: AdminLayout,
+    allowedRoles: ["admin"], // ✅ Phân quyền ở đây
     children: [
       {
-        path: "", // /system/admin
+        path: "",
         page: AdminDashboard,
       },
       {
-        path: "classes", // /system/admin/classes
+        path: "classes",
         page: ClassPage,
-      },
-      {
-        path: "schedule",
-        page: SchedulePage,
       },
       {
         path: "courses",
@@ -127,9 +177,10 @@ export const routes = [
         page: TeacherPage,
       },
       {
-        path: "exams",
-        page: ExamPage,
+        path: "assess",
+        page: AssessPage,
       },
+
       {
         path: "payment",
         page: PaymentManagement,
@@ -143,9 +194,40 @@ export const routes = [
         page: ReportPage,
       },
       {
+        path: "blog",
+        page: BlogManagementPage,
+      },
+    ],
+  },
+  // Teacher Routes
+  {
+    path: "/system/teacher",
+    layout: AdminLayout,
+    isPrivated: true,
+    allowedRoles: ["teacher"],
+    children: [
+      { path: "", page: AdminDashboard },
+      {
+        path: "exams",
+        page: ExamPage,
+      },
+      {
         path: "attendance",
         page: AttendancePage,
       },
+      {
+        path: "schedule",
+        page: SchedulePage,
+      },
+      {
+        path: "attendance-management",
+        page: AttendanceManagement,
+      },
+      {
+        path: "score-management",
+        page: ScoreManagement,
+      },
+
     ],
   },
 ];

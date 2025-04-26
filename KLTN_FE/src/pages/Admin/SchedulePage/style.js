@@ -1,39 +1,21 @@
-// SchedulePage.styles.js
 import styled from 'styled-components';
 
 export const ScheduleContainer = styled.div`
-  padding: 24px 32px;
+  padding: 32px 48px;
   background: #e3eaf2;
   border-radius: 10px;
-  height: 85vh;
   width: 100%;
   max-width: 100%;
-`;
-
-export const FilterSection = styled.div`
+  min-height: 95vh; /* ✅ Trang dài hơn */
   display: flex;
-  gap: 16px;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
-
-  .ant-select {
-    min-width: 180px;
-  }
-
-  .ant-select-selector {
-    border-radius: 8px !important;
-    border: 1px solid #ccc !important;
-    box-shadow: none !important;
-    background-color: #fff;
-  }
-
-  .ant-select:hover .ant-select-selector {
-    border-color: #1890ff !important;
-  }
+  flex-direction: column;
+  justify-content: flex-start;
 `;
+
 
 export const ScheduleTable = styled.table`
   width: 100%;
+  margin-bottom: 40px; 
   border-collapse: collapse;
   text-align: center;
   border-radius: 8px;
@@ -64,41 +46,111 @@ export const TimeCell = styled.td`
 `;
 
 export const ClassCell = styled.td`
-  min-height: 100px;
+  height: 100px; 
   background-color: #fff;
+  overflow: hidden;
+  padding: 0px 4px;
+  vertical-align: middle;
 `;
 
+
 export const ClassCard = styled.div`
+  width: 70px;
+  height: 100%; // full chiều cao của cell
   background: #e6f2ff;
-  border-left: 4px solid #1e88e5;
-  border-radius: 6px;
-  padding: 6px 8px;
-  text-align: left;
+  border-left: 3px solid #1e88e5;
+  border-radius: 4px;
+  padding: 4px 6px;
   font-size: 12px;
   color: #0d47a1;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-  margin-bottom: 4px;
   line-height: 1.4;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1px;
 
   .class-name {
     font-weight: 600;
     font-size: 13px;
-    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
-  .level {
-    font-style: italic;
-    margin-bottom: 2px;
-    color: #555;
-    font-size: 11.5px;
-  }
-
+  .level,
   .teacher,
   .room {
-    font-size: 11.5px;
+    font-size: 11px;
     color: #444;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+`;
+
+
+
+export const HeaderSection = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+
+  .left {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 8px;
+
+    .arrow-btn,
+    .today-btn {
+      background-color: #dce3ec;
+      color: #000;
+      padding: 6px 10px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      &:hover {
+        background-color: #cbd5e1;
+      }
+    }
+
+    .ant-picker {
+      border-radius: 6px;
+      height: 32px;
+    }
+
+    .date-range {
+      font-size: 13px;
+      font-weight: 500;
+      color: #0d47a1;
+      margin-left: 12px;
+    }
+  }
+
+  .right {
+    display: flex;
+    gap: 6px;
+
+    .tab {
+      background: transparent;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      color: #666;
+    }
+
+    .tab.active {
+      background-color: #d1dbe7;
+      color: #111;
+      font-weight: 600;
+    }
   }
 `;

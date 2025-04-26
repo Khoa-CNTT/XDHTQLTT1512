@@ -1,59 +1,84 @@
 import { useState, useEffect } from 'react';
-import { Table, Input, Select, Button, Tag } from 'antd';
+import { Table, Input, Select, Button, Tag, message } from 'antd';
 import { SortAscendingOutlined } from '@ant-design/icons';
-import { PageHeader, FilterContainer, HeaderActions, CenteredAction } from './style';
-
+import { PageHeader, FilterContainer, HeaderActions } from './style';
+import * as OrderService from '../../../services/OrderService'; 
+import * as ClassService from '../../../services/ClassService';
 const { Option } = Select;
-
-const samplePayments = [
-  {
-    key: '1',
-    orderId: 'ORD123',
-    studentName: 'Nguyễn Văn A',
-    email: 'a@example.com',
-    courseName: 'Cờ vua nâng cao',
-    className: 'Lớp T3-5-7',
-    amount: 1000000,
-    status: 'paid',
-    date: '2025-04-05',
-  },
-  {
-    key: '2',
-    orderId: 'ORD124',
-    studentName: 'Trần Thị B',
-    email: 'b@example.com',
-    courseName: 'Cờ vua nhập môn',
-    className: 'Lớp T2-4-6',
-    amount: 800000,
-    status: 'pending',
-    date: '2025-04-06',
-  },
-];
 
 export default function PaymentPage() {
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
+  const [classList, setClassList] = useState([]);
+  const [filterClass, setFilterClass] = useState('');
   const [sortOrder, setSortOrder] = useState('');
-  const [filteredData, setFilteredData] = useState(samplePayments);
+  const [rawData, setRawData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
 
+  // Gọi API
   useEffect(() => {
-    let results = samplePayments.filter((p) => {
+    const fetchData = async () => {
+      try {
+        const response = await OrderService.getAllOrder();
+        const data = response.data || [];
+        console.log('data', data);
+
+        const formattedData = data.map((item, index) => ({
+          key: index,
+          orderId: item._id,
+          studentName: item.studentName || '', // hoặc fetch thêm từ user nếu có
+          email: item.email,       // hoặc fetch thêm từ user nếu có
+          className: item.orderItems?.map(i => i.name).join(', '),
+          amount: item.totalPrice,
+          status: 'paid',
+          date: new Date(item.createdAt).toLocaleDateString('vi-VN'),
+        }));
+        console.log('formattedData', formattedData);
+
+        setRawData(formattedData);
+      } catch (error) {
+        console.error('Lỗi khi gọi API:', error);
+        message.error('Không thể tải dữ liệu đơn hàng');
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Lọc và sắp xếp
+  useEffect(() => {
+    let results = rawData.filter((p) => {
       const matchSearch =
         p.studentName.toLowerCase().includes(search.toLowerCase()) ||
         p.email.toLowerCase().includes(search.toLowerCase()) ||
         p.orderId.toLowerCase().includes(search.toLowerCase());
-      const matchStatus = filterStatus ? p.status === filterStatus : true;
-      return matchSearch && matchStatus;
+  
+      const matchClass = filterClass ? p.className.includes(filterClass) : true;
+  
+      return matchSearch && matchClass;
     });
-
+  
     if (sortOrder === 'asc') {
       results.sort((a, b) => a.studentName.localeCompare(b.studentName));
     } else if (sortOrder === 'desc') {
       results.sort((a, b) => b.studentName.localeCompare(a.studentName));
     }
-
+  
     setFilteredData(results);
-  }, [search, filterStatus, sortOrder]);
+  }, [search, filterClass, sortOrder, rawData]);
+  
+  //Lấy dah sách lớp
+  useEffect(() => {
+    const fetchClasses = async () => {
+      try {
+        const res = await ClassService.getAllClasses();
+        setClassList(res.data || []);
+      } catch (err) {
+        console.error('Lỗi khi lấy danh sách lớp:', err);
+      }
+    };
+    fetchClasses();
+  }, []);
 
   const columns = [
     {
@@ -72,12 +97,7 @@ export default function PaymentPage() {
       key: 'email',
     },
     {
-      title: 'Khóa học',
-      dataIndex: 'courseName',
-      key: 'courseName',
-    },
-    {
-      title: 'Lớp',
+      title: 'Khóa học',
       dataIndex: 'className',
       key: 'className',
     },
@@ -120,14 +140,17 @@ export default function PaymentPage() {
           style={{ width: 250 }}
         />
         <Select
-          placeholder="Lọc theo trạng thái"
+          value={filterClass || undefined} 
+          placeholder="Lọc theo lớp học"
           allowClear
           style={{ width: 200 }}
-          value={filterStatus}
-          onChange={(value) => setFilterStatus(value)}
+          onChange={(value) => setFilterClass(value)}
         >
-          <Option value="paid">Đã thanh toán</Option>
-          <Option value="pending">Chờ xử lý</Option>
+          {classList.map((cls) => (
+            <Option key={cls._id} value={cls.name}>
+              {cls.name}
+            </Option>
+          ))}
         </Select>
         <Button icon={<SortAscendingOutlined />} ghost onClick={() =>
           setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'))

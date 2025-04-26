@@ -18,10 +18,10 @@ export const getAllBlogs = async () => {
   );
   return res.data;
 };
-
+  
 // Lấy blog theo ID
 export const getBlogById = async (id, token) => {
-  const res = await axios.get(`${BLOG_API}/get-class-by-id/${id}`, {
+  const res = await axios.get(`${BLOG_API}/get-blog-by-id/${id}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },

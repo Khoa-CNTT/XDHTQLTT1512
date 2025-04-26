@@ -9,11 +9,16 @@ import * as UserService from "./services/UserService";
 import { useDispatch, useSelector } from "react-redux";
 import { resetUser, updateUser } from "./redux/slices/userSlice";
 import Loading from "./components/LoadingComponent/LoadingComponent";
+import PrivateRoute from "./components/PrivateRoute/PrivateRoute";
+import AccessDeniedPage from "./pages/AccessDeniedPage/AccessDeniedPage";
+
 
 function App() {
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const user = useSelector((state) => state.user);
+  console.log("User info:", user);
+
 
   useEffect(() => {
     setIsLoading(true);
@@ -58,6 +63,7 @@ function App() {
     }
   );
 
+
   const handleGetDetailsUser = async (id, token) => {
     let storageRefreshToken = localStorage.getItem("refresh_token");
     const refreshToken = JSON.parse(storageRefreshToken);
@@ -74,47 +80,83 @@ function App() {
     <div style={{ height: "100vh", width: "100%" }}>
       <Loading isLoading={isLoading}>
         <Router>
-        <Routes>
-          {routes.map((route) => {
-            if (route.children) {
-              const Layout = route.layout;
-              return (
-                <Route path={route.path} element={<Layout />} key={route.path}>
-                  {route.children.map((child) => {
-                    const ChildPage = child.page;
-                    return (
-                      <Route
-                        key={child.path}
-                        path={child.path}
-                        element={<ChildPage />}
-                      />
-                    );
-                  })}
-                </Route>
-              );
-            }
+          <Routes>
+            {routes.map((route) => {
+              if (route.children) {
+                const Layout = route.layout;
 
-            // Route bình thường
-            const Page = route.page;
-            const Layout = route.isShowHeader ? DefaultComponent : Fragment;
-            const ShowFooter = route.isShowFooter ? FooterComponent : Fragment;
-
-            return (
-              <Route
-                key={route.path}
-                path={route.path}
-                element={
-                  <>
-                    <Layout>
-                      <Page />
-                    </Layout>
-                    <ShowFooter />
-                  </>
+                // Nếu là route yêu cầu đăng nhập và phân quyền
+                if (route.isPrivated) {
+                  return (
+                    <Route
+                      key={route.path}
+                      path={route.path}
+                      element={
+                        <PrivateRoute
+                          allowedRoles={route.allowedRoles}
+                          userRole={user?.role} // 👈 truyền đúng role vào đây
+                          user={user?.user} // có thể giữ lại nếu PrivateRoute cần thêm info
+                        />
+                      }
+                    >
+                      <Route element={<Layout />}>
+                        {route.children.map((child) => {
+                          const ChildPage = child.page;
+                          return (
+                            <Route
+                              key={child.path}
+                              path={child.path}
+                              element={<ChildPage />}
+                            />
+                          );
+                        })}
+                      </Route>
+                    </Route>
+                  );
                 }
-              />
-            );
-          })}
-        </Routes>
+
+                // Route có children nhưng không phân quyền
+                return (
+                  <Route path={route.path} element={<Layout />} key={route.path}>
+                    {route.children.map((child) => {
+                      const ChildPage = child.page;
+                      return (
+                        <Route
+                          key={child.path}
+                          path={child.path}
+                          element={<ChildPage />}
+                        />
+                      );
+                    })}
+                  </Route>
+                );
+              }
+
+              // Route không có children
+              const Page = route.page;
+              const Layout = route.isShowHeader ? DefaultComponent : Fragment;
+              const ShowFooter = route.isShowFooter ? FooterComponent : Fragment;
+
+              return (
+                <Route
+                  key={route.path}
+                  path={route.path}
+                  element={
+                    <>
+                      <Layout>
+                        <Page />
+                      </Layout>
+                      <ShowFooter />
+                    </>
+                  }
+                />
+              );
+            })}
+
+            <Route path="/access-denied" element={<AccessDeniedPage />} />
+          </Routes>
+
+
         </Router>
       </Loading>
     </div>
