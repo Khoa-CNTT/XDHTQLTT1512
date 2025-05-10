@@ -166,12 +166,26 @@ const ProfilePage = () => {
   };
 
   const handleChangeAvatar = async ({ fileList }) => {
-    const file = fileList[0];
-    if (file && !file.url && !file.preview) {
-      file.preview = await getBase64(file.originFileObj);
+    const file = fileList[0];  // Lấy tệp đầu tiên trong danh sách tệp
+    if (file && file.originFileObj && avatar !== file.originFileObj.name) {
+      const formData = new FormData();
+      formData.append("file", file.originFileObj);
+      formData.append("upload_preset", "upload-uke86ro8");
+  
+      try {
+        const res = await fetch(`https://api.cloudinary.com/v1_1/dhyuxajq1/image/upload`, {
+          method: "POST",
+          body: formData,
+        });
+        const data = await res.json();
+        setAvatar(data.secure_url); 
+      } catch (error) {
+        console.error("Upload error:", error);
+      }
     }
-    setAvatar(file.preview);
   };
+  
+  
 
   return (
     <div>

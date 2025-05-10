@@ -43,8 +43,6 @@ const bulkAttendance = async (classroomId, attendances, teacherId) => {
         }))
     };
 
-    console.log("✅ Dữ liệu điểm danh chuẩn bị lưu:", JSON.stringify(attendanceRecord, null, 2));
-
     // Lưu vào database
     const result = await Attendance.create(attendanceRecord);
 
@@ -54,7 +52,6 @@ const bulkAttendance = async (classroomId, attendances, teacherId) => {
         model: "User",
         select: "name email"
     });
-    console.log("📢 Dữ liệu sau populate:", JSON.stringify(populatedAttendance, null, 2));
     // Gửi email cho phụ huynh
     EmailService.sendAttendanceEmails(populatedAttendance.attendances);
 
@@ -108,9 +105,30 @@ const getAllByIdTeacher = async (teacherId) => {
     }
 };
 
+
+const getAttendanceByClassAndDate = async (classroomId, date) => {
+  try {
+    const startOfDay = new Date(date);
+    startOfDay.setUTCHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(date);
+    endOfDay.setUTCHours(23, 59, 59, 999);
+
+    const attendance = await Attendance.findOne({
+      classroom: classroomId,
+      date: { $gte: startOfDay, $lte: endOfDay }
+    });
+
+    return attendance;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
 module.exports = {
     bulkAttendance,
     updateAttendance,
     deleteAttendance,
-    getAllByIdTeacher
+    getAllByIdTeacher,
+    getAttendanceByClassAndDate
 };

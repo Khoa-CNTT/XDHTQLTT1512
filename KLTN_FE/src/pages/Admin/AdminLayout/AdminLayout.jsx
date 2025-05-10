@@ -6,19 +6,19 @@ import { Wrapper, Content, Main } from "./style";
 
 import AdminDashboard from "../../../pages/Admin/AdminDashboard/AdminDashboard";
 import ClassPage from "../../Admin/ClassPage/ClassPage";
-import SchedulePage from "../SchedulePage/SchedulePage";
+import SchedulePage from "../../Teacher/SchedulePage/SchedulePage";
 import CoursePage from "../CoursePage/CoursePage";
 import StudentPage from "../StudentPage/StudentPage";
 import TeacherPage from "../TeacherPage/TeacherPage";
-import ExamPage from "../ExamPage/ExamPage";
+import ExamPage from "../../Teacher/ExamPage/ExamPage";
 import PaymentManagement from "../PaymentManagementPage/PaymentManagement";
 import ReportPage from "../ReportPage/ReportPage";
 import AssessPage from "../AssessPage/AssessPage";
-import AttendancePage from "../AttendancePage/AttendancePage";
-import AttendanceManagement from "../../AttendanceManagement/AttendanceManagement";
+import AttendanceManagement from "../../Teacher/AttendanceManagement/AttendanceManagement";
 import BlogManagementPage from "../BlogManagementPage/BlogManagementPage";
-import ScoreManagement from "../../ScoreManagementPage/ScoreManagementPage";
-
+import ScoreManagement from "../../Teacher/ScoreManagementPage/ScoreManagementPage";
+import SuggettionManagement from "../SuggestionManagement/SuggestionManagement";
+import NotificationManagementAD from "../NotificationManagementAD/NotificationManagementAD";
 const AdminLayout = ({ children }) => {
   const location = useLocation();
 
@@ -50,23 +50,26 @@ const AdminLayout = ({ children }) => {
     if (location.pathname === "/system/admin/assess") {
       return <AssessPage />;
     }
-    if (location.pathname === "/system/teacher/attendance") {
-      return <AttendancePage />;
-    }
     if (location.pathname === "/system/admin/payment") {
       return <PaymentManagement />;
     }
     if (location.pathname === "/system/admin/blog") {
       return <BlogManagementPage />;
     }
+    if (location.pathname === "/system/admin/suggest-management") {
+      return <SuggettionManagement />;
+    }
     if (location.pathname === "/system/admin/report") {
       return <ReportPage />;
     }
     if (location.pathname === "/system/teacher/attendance-management") {
-      return <AttendanceManagement/>
+      return <AttendanceManagement />
     }
     if (location.pathname === "/system/teacher/score-management") {
-      return <ScoreManagement/>
+      return <ScoreManagement />
+    }
+    if (location.pathname === "/system/admin/notification-management") {
+      return <NotificationManagementAD />
     }
 
     return <AdminDashboard />;

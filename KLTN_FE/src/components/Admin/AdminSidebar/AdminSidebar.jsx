@@ -11,10 +11,11 @@ import {
   BarChartOutlined,
   CommentOutlined,
   LogoutOutlined,
-  FormOutlined,
+  ReadOutlined,
   CarryOutOutlined,
   TrophyOutlined,
   FileTextOutlined,
+  BellOutlined
 
 } from "@ant-design/icons";
 import { SidebarWrapper, LogoSection, StyledModal } from "./style";
@@ -91,8 +92,14 @@ const Sidebar = () => {
               <Menu.Item key="/system/admin/assess" icon={<CommentOutlined />}>
                 <Link to="/system/admin/assess">Quản lý đánh giá</Link>
               </Menu.Item>
+              <Menu.Item key="/system/admin/suggest-management" icon={<ReadOutlined />}>
+                <Link to="/system/admin/suggest-management">Bài khảo sát</Link>
+              </Menu.Item>
               <Menu.Item key="/system/admin/report" icon={<BarChartOutlined />}>
                 <Link to="/system/admin/report">Báo cáo & Thống kê</Link>
+              </Menu.Item>
+              <Menu.Item key="/system/admin/notification-management" icon={<BellOutlined />}>
+                <Link to="/system/admin/notification-management">Quản lý thông báo</Link>
               </Menu.Item>
             </>
           )}
@@ -105,9 +112,6 @@ const Sidebar = () => {
                 icon={<CalendarOutlined />}
               >
                 <Link to="/system/teacher/schedule">Lịch giảng dạy</Link>
-              </Menu.Item>
-              <Menu.Item key="/system/teacher/attendance" icon={<FormOutlined />}>
-                <Link to="/system/teacher/attendance">Điểm danh</Link>
               </Menu.Item>
               <Menu.Item key="/system/teacher/attendance-management" icon={<CarryOutOutlined />}>
                 <Link to="/system/teacher/attendance-management">Quản lý điểm danh</Link>
